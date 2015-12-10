@@ -15,7 +15,7 @@ def register(request):
         user_form = UserForm(data=request.POST)
         if user_form.is_valid():
             user = user_form.save()
-            user.set_password(user.password)
+            # user.set_password(user.password)
             user.save()
 
             registered = True
@@ -27,7 +27,7 @@ def register(request):
     else:
         user_form = UserForm()
 
-    return render_to_response('DBookie/register.html',
+    return render_to_response('ebooks/register.html',
                               {'user_form': user_form, 'registered': registered}, context)
 
 

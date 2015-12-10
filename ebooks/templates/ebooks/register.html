@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DBookie</title>
+    </head>
+
+    <body>
+        <h1>Register with DBookie!</h1>
+
+        {% if registered %}
+            DBookie says: <strong>thank you for registering!</strong>
+        <a href="/ebooks/login">Return to the login page.</a><br />
+        {% else %}
+            DBookie says: <strong>register here!</strong><br />
+
+        <form id="user_form" method="post" action="/ebooks/register/"
+                enctype="multipart/form-data">
+
+            {% csrf_token %}
+
+            {{ user_form.as_p }}
+
+
+            <input type="submit" name="submit" value="Register" />
+        </form>
+        {% endif %}
+    </body>
+</html>
