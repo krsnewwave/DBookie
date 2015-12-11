@@ -1,7 +1,10 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
 from ebooks.forms import UserForm
+from ebooks.models import Book
 
 __author__ = 'Dylan'
 
@@ -32,4 +35,8 @@ def register(request):
 
 
 def index(request):
-    return HttpResponse("Hello, world.")
+    try:
+        books = Book.objects.all()
+    except ObjectDoesNotExist:
+        raise Http404
+    return render_to_response('ebooks/book_list.html',{'books':books})
