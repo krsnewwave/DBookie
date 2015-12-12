@@ -13,12 +13,13 @@
         {% else %}
             DBookie says: <strong>register here!</strong><br />
 
-        <form id="user_form" method="post" action="/ebooks/register/"
+        <form id="registration_form" method="post" action="/ebooks/register/"
                 enctype="multipart/form-data">
 
             {% csrf_token %}
 
             {{ user_form.as_p }}
+            {{ customer_form.as_p }}
 
 
             <input type="submit" name="submit" value="Register" />

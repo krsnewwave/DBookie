@@ -8,8 +8,10 @@
 # Also note: You'll have to insert the output of 'django-admin.py sqlcustom [app_label]'
 # into your database.
 from __future__ import unicode_literals
+from django.contrib.auth.models import User
 
 from django.db import models
+from django.db.models.signals import post_save
 
 
 class Author(models.Model):
@@ -126,18 +128,24 @@ class Status(models.Model):
         db_table = 'status'
 
 
-class User(models.Model):
-    username = models.CharField(primary_key=True, max_length=20, )
-    first_name = models.CharField(max_length=45, blank=True)
-    last_name = models.CharField(max_length=45, blank=True)
+class Customer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, db_column='auth_user_id')
     middle_name = models.CharField(max_length=45, blank=True)
-    email = models.EmailField(max_length=255)
-    password = models.CharField(max_length=40)
-    create_time = models.DateTimeField(auto_now=True)
     address = models.CharField(max_length=100, blank=True)
     phone = models.CharField(max_length=45, blank=True)
     shopping_cart_transaction = models.ForeignKey(ShoppingCart, blank=True, null=True)
 
+    def __str__(self):
+        return "%s's profile" % self.user
+
     class Meta:
         managed = False
         db_table = 'user'
+
+
+# def create_customer(sender, instance, created, **kwargs):
+#     if created:
+#         customer, created = Customer.objects.get_or_create(user=instance)
+
+
+# post_save.connect(create_customer, sender=User)
