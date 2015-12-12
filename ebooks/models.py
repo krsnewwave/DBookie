@@ -73,7 +73,7 @@ class BookHasCategory(models.Model):
 
 
 class CartItem(models.Model):
-    id = models.IntegerField(primary_key=True, auto_created=True)  # AutoField?
+    id = models.AutoField(primary_key=True)
     discount = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     books_isbn = models.ForeignKey(Book, db_column='books_isbn')
     shopping_cart_transaction = models.ForeignKey('ShoppingCart')
@@ -84,7 +84,7 @@ class CartItem(models.Model):
 
 
 class Payment(models.Model):
-    id = models.IntegerField(primary_key=True, auto_created=True)  # AutoField?
+    id = models.AutoField(primary_key=True)
     total_payment = models.DecimalField(max_digits=10, decimal_places=0)
     date_paid = models.DateTimeField()
     credit_card_number = models.CharField(max_length=100)
@@ -100,7 +100,6 @@ class Payment(models.Model):
 
 class Publisher(models.Model):
     id = models.AutoField(primary_key=True)
-    # id = models.IntegerField(primary_key=True, auto_created=True)  # AutoField?
     name = models.CharField(max_length=100)
     address = models.CharField(max_length=1000, blank=True)
 
@@ -110,8 +109,9 @@ class Publisher(models.Model):
 
 
 class ShoppingCart(models.Model):
-    transaction_id = models.IntegerField(primary_key=True, auto_created=True)
-    date_created = models.DateTimeField()
+    # transaction_id = models.IntegerField(primary_key=True, auto_created=True)
+    transaction_id = models.AutoField(primary_key=True)
+    date_created = models.DateTimeField(auto_now=True)
     status = models.ForeignKey('Status')
 
     class Meta:
@@ -120,7 +120,7 @@ class ShoppingCart(models.Model):
 
 
 class Status(models.Model):
-    id = models.IntegerField(primary_key=True, auto_created=True)  # AutoField?
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=45, blank=True)
 
     class Meta:
@@ -129,11 +129,12 @@ class Status(models.Model):
 
 
 class Customer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, db_column='auth_user_id')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, db_column='auth_user_id', primary_key=True)
     middle_name = models.CharField(max_length=45, blank=True)
     address = models.CharField(max_length=100, blank=True)
     phone = models.CharField(max_length=45, blank=True)
-    shopping_cart_transaction = models.ForeignKey(ShoppingCart, blank=True, null=True)
+    shopping_cart_transaction = models.ForeignKey(ShoppingCart, blank=True, null=True,
+                                                  db_column='shopping_cart_transaction_id')
 
     def __str__(self):
         return "%s's profile" % self.user
@@ -141,7 +142,6 @@ class Customer(models.Model):
     class Meta:
         managed = False
         db_table = 'user'
-
 
 # def create_customer(sender, instance, created, **kwargs):
 #     if created:
