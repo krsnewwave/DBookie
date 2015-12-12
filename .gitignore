@@ -43,3 +43,12 @@ Temporary Items
 .apdisk
 .idea/*
 *.iml
+*.pyc
+*.pyc
+ebooks/migrations/0008_auto_20151212_1122.py
+ebooks/migrations/0004_auto_20151212_1030.py
+ebooks/migrations/0005_auto_20151212_1032.py
+ebooks/migrations/0006_auto_20151212_1055.py
+ebooks/migrations/0007_auto_20151212_1111.py
+ebooks/migrations/0003_customer.py
+*.pyc
