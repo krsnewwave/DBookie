@@ -78,6 +78,21 @@ class CartItem(models.Model):
     books_isbn = models.ForeignKey(Book, db_column='books_isbn')
     shopping_cart_transaction = models.ForeignKey('ShoppingCart')
 
+    @property
+    def discount_percent(self):
+        if self.discount:
+            return round(self.discount * 100, 0)
+        else:
+            return 0
+
+    @property
+    def discounted_price(self):
+        if self.discount:
+            return round(self.books_isbn.unit_price - (
+                self.discount * self.books_isbn.unit_price), 2)
+        else:
+            return self.books_isbn.unit_price
+
     class Meta:
         managed = False
         db_table = 'cart_item'

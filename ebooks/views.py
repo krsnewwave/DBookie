@@ -99,6 +99,31 @@ def index(request):
 
 
 @login_required
+def view_cart(request):
+    # get the user
+    user_id = request.user.id
+    # get the customer
+    customer = Customer.objects.get(pk=user_id)
+    # get its shopping cart
+    cart = customer.shopping_cart_transaction
+    books = []
+    cart_items = []
+    sum_price = 0
+    for item in cart.cartitem_set.all():
+        isbn = item.books_isbn_id
+        book = Book.objects.get(pk=isbn)
+        books.append(book)
+        if item.discount is not None:
+            sum_price += book.unit_price * item.discount
+        else:
+            sum_price += book.unit_price
+        cart_items.append(item)
+    print(cart_items)
+    return render(request, 'ebooks/my_cart.html',
+                  {'cart': cart_items, 'sum_price': sum_price})
+
+
+@login_required
 def add_to_cart(request, isbn):
     # get the user
     user_id = request.user.id

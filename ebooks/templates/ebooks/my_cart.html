@@ -58,6 +58,11 @@
             width: 22.5%; /* this value + 2.5 should = 25% */
         }
 
+        /* strike through */
+        p.line {
+            text-decoration: line-through;
+        }
+
         @media (max-width: 480px) {
             ul.grid-nav li {
                 display: block;
@@ -76,6 +81,8 @@
                 width: 100% !important; /* over-ride all li styles */
                 margin: 0 0 20px;
             }
+        }
+
     </style>
 
 </head>
@@ -95,22 +102,43 @@
             {% endif %}
         </div>
     </div>
-    {#    <a href="{% url 'logout' %}">Logout</a>#}
     <a href="{% url 'ebooks:logout' %}">Logout</a>
-    <a href="{% url 'ebooks:view_cart' %}">
-        View Your Cart ({% if items %}{{ items|length }}{% else %}0{% endif %})
-    </a>
+    <a href="{% url 'ebooks:index' %}">Shop more</a>
 
     <!-- Title -->
     <div class="row">
         <div class="col-lg-14">
-            <h3>Books</h3>
+            <h3>Your Shopping Cart</h3>
         </div>
     </div>
     <!-- /.row -->
 
     <!-- Page Features -->
     <ul class="rig columns-4">
+        {% for c in cart %}
+            <li>
+                <!--div class="thumbnail"-->
+                <img src=/static/img/{{ c.books_isbn.image }}
+ alt="{{ c.books_isbn.image }}"/>
+                <!--div class="caption"-->
+                <p>
+                    <a href="/ebooks/bookdetails/{{ c.books_isbn.isbn }}"
+                       class="btn btn-default">{{ c.books_isbn.title }}</a>
+                </p>
+
+                {% if not c.discount %}
+                    <p><b> PHP: {{ c.discounted_price }}</b></p>
+                {% else %}
+                    <p class="line"> PHP: {{ c.books_isbn.unit_price }}</p>
+                    <p>PHP: {{ c.discounted_price }} ({{ c.discount_percent }}% off!)</p>
+                {% endif %}
+            </li>
+
+        {% endfor %}
+    </ul>
+
+
+    {% comment %}    <ul class="rig columns-4">
         {% for b in books %}
             <li>
                 <!--div class="thumbnail"-->
@@ -120,19 +148,25 @@
                     <a href="/ebooks/bookdetails/{{ b.isbn }}" class="btn btn-default">{{ b.title }}</a>
                 </p>
 
-                <p><b> PHP: {{ b.unit_price }}</b></p>
-                {% if b in items %}
-                    In your shopping cart
+                {% if not b.discount %}
+                    <p><b> PHP: {{ b.unit_price }}</b></p>
                 {% else %}
-                    <a href="{% url 'ebooks:add_to_cart' b.isbn %}">Add to Cart</a>
+                    <p class="line"> PHP: {{ b.unit_price }}</p>
+                    <p>PHP: {{ b.discounted_price }}</p>
                 {% endif %}
             </li>
 
         {% endfor %}
-    </ul>
+    </ul>{% endcomment %}
     <!-- /.row -->
-    <hr>
+    <ul class="rig columns-4">
+        <li>Total:
+            {{ sum_price }}
+        </li>
+    </ul>
 
+
+    <hr>
 
     <!-- Footer -->
     <footer>
