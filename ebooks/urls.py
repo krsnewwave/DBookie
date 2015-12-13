@@ -1,3 +1,5 @@
+from ebooks.views import PaymentNew
+
 __author__ = 'Dylan'
 
 from django.conf.urls import url
@@ -13,4 +15,6 @@ urlpatterns = [
     url(r'^register/$', views.register, name='register'),
     url(r'^cart/(?P<isbn>[A-z0-9\-]+)/$', views.add_to_cart, name='add_to_cart'),
     url(r'^my_cart/$', views.view_cart, name='view_cart'),
+    url(r'^billing/$', PaymentNew.as_view(), name='billing'),
+    url(r'^my_purchases/$', views.view_purchases, name='purchases'),
 ]

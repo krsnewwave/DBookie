@@ -6,8 +6,9 @@ from django.shortcuts import render_to_response, render
 from django.template import RequestContext
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
-from ebooks.forms import CustomerForm, UserForm
-from ebooks.models import Book, Customer, ShoppingCart, CartItem, Status
+from django.views.generic import CreateView, DetailView
+from ebooks.forms import CustomerForm, UserForm, NewPaymentForm
+from ebooks.models import Book, Customer, ShoppingCart, CartItem, Status, Payment
 
 UNPAID_STATUS = 'Unpaid'
 
@@ -82,17 +83,26 @@ def user_logout(request):
 def index(request):
     try:
         books = Book.objects.all()
+        # get all shopping carts with this user
+        bought_items = ShoppingCart.objects.filter(shopping_cart_customer_id=request.user.id)
+        # remove the cart still in the customer's current cart
+        transactions = [fc for fc in bought_items
+                        if fc.transaction_id != request.user.customer.shopping_cart_transaction_id]
+        bought_isbns = []
+        for transaction in transactions:
+            for item in transaction.cartitem_set.all():
+                bought_isbns.append(item.books_isbn)
 
         # provide also the user's shopping cart: the list of item isbns
         # user_id = request.user.id
         # cart = Customer.objects.get(pk=user_id).shopping_cart_transaction
         cart = request.user.customer.shopping_cart_transaction
 
-        if cart is not None:
-            items = [item.books_isbn for item in cart.cartitem_set.all()]
-            return render(request, 'ebooks/book_list.html', {'books': books, 'items': items})
-        else:
+        if not cart or not bought_isbns:
             return render(request, 'ebooks/book_list.html', {'books': books})
+        else:
+            items = [item.books_isbn for item in cart.cartitem_set.all()]
+            return render(request, 'ebooks/book_list.html', {'books': books, 'items': items, 'bought': bought_isbns})
 
     except ObjectDoesNotExist:
         raise Http404
@@ -109,18 +119,21 @@ def view_cart(request):
     books = []
     cart_items = []
     sum_price = 0
-    for item in cart.cartitem_set.all():
-        isbn = item.books_isbn_id
-        book = Book.objects.get(pk=isbn)
-        books.append(book)
-        if item.discount is not None:
-            sum_price += book.unit_price * item.discount
-        else:
-            sum_price += book.unit_price
-        cart_items.append(item)
-    print(cart_items)
-    return render(request, 'ebooks/my_cart.html',
-                  {'cart': cart_items, 'sum_price': sum_price})
+    if not cart:
+        return render(request, 'ebooks/my_cart.html',
+                      {'cart': [], 'sum_price': 0})
+    else:
+        for item in cart.cartitem_set.all():
+            isbn = item.books_isbn_id
+            book = Book.objects.get(pk=isbn)
+            books.append(book)
+            if item.discount is not None:
+                sum_price += book.unit_price * item.discount
+            else:
+                sum_price += book.unit_price
+            cart_items.append(item)
+        return render(request, 'ebooks/my_cart.html',
+                      {'cart': cart_items, 'sum_price': sum_price})
 
 
 @login_required
@@ -134,7 +147,6 @@ def add_to_cart(request, isbn):
 
     # if the shopping cart is empty, make a new one
     if cart is None:
-        cart = ShoppingCart()
         # get the status 'Unpaid'
         qs = Status.objects.filter(name__iexact=UNPAID_STATUS)
         # if not available, make it
@@ -146,7 +158,7 @@ def add_to_cart(request, isbn):
             status = qs[0]
 
         # save the cart
-        cart = ShoppingCart.objects.create(status=status)
+        cart = ShoppingCart.objects.create(status=status, shopping_cart_customer=customer)
         customer.shopping_cart_transaction_id = cart.transaction_id
         customer.save(force_update=True)
 
@@ -155,4 +167,57 @@ def add_to_cart(request, isbn):
     CartItem.objects.create(books_isbn=book, shopping_cart_transaction=cart)
 
     return HttpResponseRedirect('/ebooks/')
-    # return render(request, 'ebooks/book_list.html', {'books': request.books, })
+
+
+@login_required
+def view_purchases(request):
+    # get the user
+    user_id = request.user.id
+    # get all shopping carts with this user
+    carts = ShoppingCart.objects.filter(shopping_cart_customer_id=user_id)
+    # remove the cart still in the customer's current cart
+    carts = [fc for fc in carts if fc.transaction_id != request.user.customer.shopping_cart_transaction_id]
+
+    # get all the books in all these carts
+    books = []
+    for cart in carts:
+        for item in cart.cartitem_set.all():
+            isbn = item.books_isbn_id
+            book = Book.objects.get(pk=isbn)
+            books.append(book)
+
+    return render(request, 'ebooks/purchases.html', {'books': books})
+
+
+class PaymentNew(CreateView):
+    model = Payment
+    # fields = ['credit_card_number', 'cardholder_name', 'cardholder_billing_address',
+    #           'cardholder_expiration']
+    form_class = NewPaymentForm
+    template_name = 'ebooks/billing.html'
+
+    def form_valid(self, form):
+        payment = form.save(commit=False)
+        # get the user's shopping cart
+        user_id = self.request.user.id
+        # get the customer's cart ID and link that into the current payment
+        customer = Customer.objects.get(pk=user_id)
+        cart_id = customer.shopping_cart_transaction.transaction_id
+        payment.shopping_cart_transaction_id = cart_id
+        # get the total payment in the shopping cart
+        sum_price = 0
+        for item in customer.shopping_cart_transaction.cartitem_set.all():
+            isbn = item.books_isbn_id
+            book = Book.objects.get(pk=isbn)
+            if item.discount is not None:
+                sum_price += book.unit_price * item.discount
+            else:
+                sum_price += book.unit_price
+
+        # then empty the shopping cart of the customer
+        customer.shopping_cart_transaction = None
+        customer.save()
+
+        payment.total_payment = sum_price
+        payment.save()
+        return HttpResponseRedirect('/ebooks/my_purchases')

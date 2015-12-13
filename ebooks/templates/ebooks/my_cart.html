@@ -115,6 +115,7 @@
 
     <!-- Page Features -->
     <ul class="rig columns-4">
+        {% if cart|length > 0 %}
         {% for c in cart %}
             <li>
                 <!--div class="thumbnail"-->
@@ -133,40 +134,23 @@
                     <p>PHP: {{ c.discounted_price }} ({{ c.discount_percent }}% off!)</p>
                 {% endif %}
             </li>
-
         {% endfor %}
+        {% else %}
+            <li>Sorry you haven't yet added anything into your cart.</li>
+        {% endif %}
     </ul>
-
-
-    {% comment %}    <ul class="rig columns-4">
-        {% for b in books %}
-            <li>
-                <!--div class="thumbnail"-->
-                <img src=/static/img/{{ b.image }} alt="{{ b.title }}"/>
-                <!--div class="caption"-->
-                <p>
-                    <a href="/ebooks/bookdetails/{{ b.isbn }}" class="btn btn-default">{{ b.title }}</a>
-                </p>
-
-                {% if not b.discount %}
-                    <p><b> PHP: {{ b.unit_price }}</b></p>
-                {% else %}
-                    <p class="line"> PHP: {{ b.unit_price }}</p>
-                    <p>PHP: {{ b.discounted_price }}</p>
-                {% endif %}
-            </li>
-
-        {% endfor %}
-    </ul>{% endcomment %}
-    <!-- /.row -->
     <ul class="rig columns-4">
         <li>Total:
             {{ sum_price }}
         </li>
     </ul>
-
-
     <hr>
+
+    <ul class="rig columns-4">
+        <li>
+            <a href="{% url 'ebooks:billing' %}">Proceed to checkout</a>
+        </li>
+    </ul>
 
     <!-- Footer -->
     <footer>

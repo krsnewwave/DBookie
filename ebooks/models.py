@@ -11,7 +11,6 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import User
 
 from django.db import models
-from django.db.models.signals import post_save
 
 
 class Author(models.Model):
@@ -101,7 +100,7 @@ class CartItem(models.Model):
 class Payment(models.Model):
     id = models.AutoField(primary_key=True)
     total_payment = models.DecimalField(max_digits=10, decimal_places=0)
-    date_paid = models.DateTimeField()
+    date_paid = models.DateTimeField(auto_now=True)
     credit_card_number = models.CharField(max_length=100)
     cardholder_name = models.CharField(max_length=100, blank=True)
     cardholder_billing_address = models.CharField(max_length=1000, blank=True)
@@ -124,10 +123,10 @@ class Publisher(models.Model):
 
 
 class ShoppingCart(models.Model):
-    # transaction_id = models.IntegerField(primary_key=True, auto_created=True)
     transaction_id = models.AutoField(primary_key=True)
     date_created = models.DateTimeField(auto_now=True)
     status = models.ForeignKey('Status')
+    shopping_cart_customer = models.ForeignKey('Customer', db_column='customer_id')
 
     class Meta:
         managed = False

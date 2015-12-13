@@ -100,6 +100,7 @@
     <a href="{% url 'ebooks:view_cart' %}">
         View Your Cart ({% if items %}{{ items|length }}{% else %}0{% endif %})
     </a>
+    <a href="{% url 'ebooks:purchases' %}">View Your Purchases</a>
 
     <!-- Title -->
     <div class="row">
@@ -123,6 +124,8 @@
                 <p><b> PHP: {{ b.unit_price }}</b></p>
                 {% if b in items %}
                     In your shopping cart
+                {% elif b in bought %}
+                    Already bought
                 {% else %}
                     <a href="{% url 'ebooks:add_to_cart' b.isbn %}">Add to Cart</a>
                 {% endif %}
