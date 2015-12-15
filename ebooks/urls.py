@@ -17,4 +17,5 @@ urlpatterns = [
     url(r'^my_cart/$', views.view_cart, name='view_cart'),
     url(r'^billing/$', PaymentNew.as_view(), name='billing'),
     url(r'^my_purchases/$', views.view_purchases, name='purchases'),
+    url(r'^book_details/(?P<isbn>[A-z0-9\-]+)/$', views.book_details, name='book_details'),
 ]

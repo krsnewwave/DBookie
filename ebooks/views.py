@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.views.generic import CreateView, DetailView
 from ebooks.forms import CustomerForm, UserForm, NewPaymentForm
-from ebooks.models import Book, Customer, ShoppingCart, CartItem, Status, Payment
+from ebooks.models import Book, Customer, ShoppingCart, CartItem, Status, Payment, BookHasAuthor, Author, BookHasCategory
 
 UNPAID_STATUS = 'Unpaid'
 
@@ -99,7 +99,7 @@ def index(request):
         cart = request.user.customer.shopping_cart_transaction
 
         if not cart or not bought_isbns:
-            return render(request, 'ebooks/book_list.html', {'books': books})
+		    return render(request, 'ebooks/book_list.html', {'books': books})
         else:
             items = [item.books_isbn for item in cart.cartitem_set.all()]
             return render(request, 'ebooks/book_list.html', {'books': books, 'items': items, 'bought': bought_isbns})
@@ -221,3 +221,27 @@ class PaymentNew(CreateView):
         payment.total_payment = sum_price
         payment.save()
         return HttpResponseRedirect('/ebooks/my_purchases')
+
+def book_details(request, isbn):
+    # get the book
+    book = Book.objects.get(pk=isbn)
+
+    #get the author of the book
+    bookHasAuthors = BookHasAuthor.objects.get(books_isbn=isbn)
+
+    #get the category of the book
+    bookHasCategory = BookHasCategory.objects.get(books_isbn=isbn)
+
+    book_data = {
+        "isbn" : book.isbn,
+        "title" : book.title,
+        "author" : bookHasAuthors.author,
+        "image" : book.image,
+        "publisher" : book.publisher.name,
+        "pub_date":book.pub_date,
+        "categories" : bookHasCategory.category_name
+    }
+
+
+
+    return render(request, 'ebooks/book_details.html', {'book': book_data})

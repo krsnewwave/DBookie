@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <title>Book Details</title>
+
+</head>
+
+<body>
+
+<!-- Page Content -->
+<div class="container">
+
+    <hr>
+
+    <!-- Title -->
+    <div class="row">
+        <div class="col-lg-14">
+            <h3>Book Details</h3>
+        </div>
+    </div>
+    <!-- /.row -->
+    <img src=/static/img/{{ book.image }} alt="{{ book.title }}"/>
+
+    <p><b> ISBN: {{ book.isbn }}</b></p>
+
+    <p><b> Author: {{ book.author.first_name}} {{ book.author.last_name}}</b></p>
+    <p><b> Publisher: {{ book.publisher }}</b></p>
+    <p><b> Publication Date: {{ book.pub_date }}</b></p>
+    <p><b> Categories: {{ book.categories.name }}</b></p>
+
+
+
+    <!-- /.row -->
+    <hr>
+    <!-- Title -->
+    <div class="row">
+        <div class="col-lg-14">
+            <h3>Author Details</h3>
+        </div>
+    </div>
+    <p><b> Author: {{ book.author.first_name}} {{ book.author.last_name}}</b></p>
+    <p><b> Biodata: {{ book.author.bio }}</b></p>
+    <p><b> Email/Website: {{ book.author.email }}</b></p>
+
+    <hr>
+
+
+</div>
+<!-- /.container -->
+
+</body>
+
+</html>

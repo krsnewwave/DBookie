@@ -118,7 +118,7 @@
                 <img src=/static/img/{{ b.image }} alt="{{ b.title }}"/>
                 <!--div class="caption"-->
                 <p>
-                    <a href="/ebooks/bookdetails/{{ b.isbn }}" class="btn btn-default">{{ b.title }}</a>
+                    <a href={% url 'ebooks:book_details' b.isbn %}>{{ b.title }}</a>
                 </p>
 
                 <p><b> PHP: {{ b.unit_price }}</b></p>
